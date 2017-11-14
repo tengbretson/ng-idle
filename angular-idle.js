@@ -310,7 +310,8 @@ angular.module('ngIdle.idle', ['ngIdle.keepalive', 'ngIdle.localStorage'])
           }
         };
 
-        $document.find('html').on(options.interrupt, function(event) {
+        var $html = $document.find('html');
+        function handleInterrupt(event) {
           if (event.type === 'mousemove' && event.originalEvent && event.originalEvent.movementX === 0 && event.originalEvent.movementY === 0) {
             return; // Fix for Chrome desktop notifications, triggering mousemove event.
           }
@@ -318,6 +319,11 @@ angular.module('ngIdle.idle', ['ngIdle.keepalive', 'ngIdle.localStorage'])
           if (event.type !== 'mousemove' || lastMove.hasMoved(event)) {
             svc.interrupt();
           }
+        }
+
+        $html.on(options.interrupt, handleInterrupt);
+        $rootScope.$on('$destroy', function () {
+          $html.off(options.interrupt, handleInterrupt);
         });
 
         if(options.windowInterrupt) {
